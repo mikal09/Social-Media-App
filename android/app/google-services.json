@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "53044098436",
+    "firebase_url": "https://socialhub-09.firebaseio.com",
+    "project_id": "socialhub-09",
+    "storage_bucket": "socialhub-09.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53044098436:android:b84efab250e9578f3399d1",
+        "android_client_info": {
+          "package_name": "com.example.SocialHub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "53044098436-6pn7o1cfehi4l6qn9snp9kal1pttb96r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.SocialHub",
+            "certificate_hash": "d6697c4d4a4bfa438ab5ef979a1c4a89b2ca4f43"
+          }
+        },
+        {
+          "client_id": "53044098436-m5t6cklun410fqktnlmg96n6q0bn12kl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRkEjvgkG_2sWV1fw-cS5iJ4vzd04AmXg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53044098436-m5t6cklun410fqktnlmg96n6q0bn12kl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
