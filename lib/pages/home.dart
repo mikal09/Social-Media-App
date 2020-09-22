@@ -1,13 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:SocialHub/models/user.dart';
 import 'package:SocialHub/pages/activity_feed.dart';
+import 'package:SocialHub/pages/create_account.dart';
 import 'package:SocialHub/pages/profile.dart';
 import 'package:SocialHub/pages/search.dart';
 import 'package:SocialHub/pages/timeline.dart';
 import 'package:SocialHub/pages/upload.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final usersRef = FirebaseFirestore.instance.collection('users');
+final DateTime timestamp = DateTime.now();
+User currentUser;
 
 class Home extends StatefulWidget {
   @override
@@ -39,7 +45,7 @@ class _HomeState extends State<Home> {
 
   handleSignIn(GoogleSignInAccount account) {
     if (account != null) {
-      print('User signed in!: $account');
+      createUserInFirestore();
       setState(() {
         isAuth = true;
       });
@@ -48,6 +54,36 @@ class _HomeState extends State<Home> {
         isAuth = false;
       });
     }
+  }
+
+  createUserInFirestore() async {
+    // 1) check if user exists in users collection in database (according to their id)
+    final GoogleSignInAccount user = googleSignIn.currentUser;
+    DocumentSnapshot doc = await usersRef.doc(user.id).get();
+
+    // print(1);
+
+    if (!doc.exists) {
+      print(2);
+      // 2) if the user doesn't exist, then we want to take them to the create account page
+      final username = await Navigator.push(
+          context, MaterialPageRoute(builder: (context) => CreateAccount()));
+
+      // 3) get username from create account, use it to make new user document in users collection
+      usersRef.doc(user.id).set({
+        "id": user.id,
+        "username": username,
+        "photoUrl": user.photoUrl,
+        "email": user.email,
+        "displayName": user.displayName,
+        "bio": "",
+        "timestamp": timestamp
+      });
+
+      doc = await usersRef.doc(user.id).get();
+    }
+
+    currentUser = User.fromDocument(doc);
   }
 
   @override
@@ -71,8 +107,10 @@ class _HomeState extends State<Home> {
   }
 
   onTap(int pageIndex) {
-    pageController.jumpToPage(
+    pageController.animateToPage(
       pageIndex,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
     );
   }
 
@@ -80,7 +118,11 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: PageView(
         children: <Widget>[
-          Timeline(),
+          // Timeline(),
+          RaisedButton(
+            child: Text('Logout'),
+            onPressed: logout,
+          ),
           ActivityFeed(),
           Upload(),
           Search(),
@@ -95,24 +137,16 @@ class _HomeState extends State<Home> {
           onTap: onTap,
           activeColor: Theme.of(context).primaryColor,
           items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.whatshot),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_active),
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.whatshot)),
+            BottomNavigationBarItem(icon: Icon(Icons.notifications_active)),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.photo_camera,
                 size: 35.0,
               ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.search)),
+            BottomNavigationBarItem(icon: Icon(Icons.account_circle)),
           ]),
     );
     // return RaisedButton(
