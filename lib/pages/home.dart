@@ -64,10 +64,7 @@ class _HomeState extends State<Home> {
     final GoogleSignInAccount user = googleSignIn.currentUser;
     DocumentSnapshot doc = await usersRef.doc(user.id).get();
 
-    // print(1);
-
     if (!doc.exists) {
-      print(2);
       // 2) if the user doesn't exist, then we want to take them to the create account page
       final username = await Navigator.push(
           context, MaterialPageRoute(builder: (context) => CreateAccount()));
