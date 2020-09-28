@@ -109,7 +109,9 @@ class _PostState extends State<Post> {
             backgroundColor: Colors.grey,
           ),
           title: GestureDetector(
-            onTap: () => showProfile(context, profileId: user.id),
+            onTap: () {
+              showProfile(context, profileId: user.id);
+            },
             child: Text(
               user.username,
               style: TextStyle(
@@ -121,7 +123,9 @@ class _PostState extends State<Post> {
           subtitle: Text(location),
           trailing: isPostOwner
               ? IconButton(
-                  onPressed: () => handleDeletePost(context),
+                  onPressed: () {
+                    handleDeletePost(context);
+                  },
                   icon: Icon(Icons.more_vert),
                 )
               : Text(''),
@@ -364,11 +368,16 @@ class _PostState extends State<Post> {
 
 showComments(BuildContext context,
     {String postId, String ownerId, String mediaUrl}) {
-  Navigator.push(context, MaterialPageRoute(builder: (context) {
-    return Comments(
-      postId: postId,
-      postOwnerId: ownerId,
-      postMediaUrl: mediaUrl,
-    );
-  }));
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) {
+        return Comments(
+          postId: postId,
+          postOwnerId: ownerId,
+          postMediaUrl: mediaUrl,
+        );
+      },
+    ),
+  );
 }

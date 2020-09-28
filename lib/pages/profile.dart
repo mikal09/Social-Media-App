@@ -55,7 +55,7 @@ class _ProfileState extends State<Profile> {
         .collection('userFollowers')
         .get();
     setState(() {
-      followerCount = snapshot.docs.length;
+      followerCount = snapshot.docs.length - 1;
     });
   }
 
