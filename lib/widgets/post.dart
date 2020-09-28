@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:SocialHub/pages/activity_feed.dart';
+
 import 'package:animator/animator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:SocialHub/models/user.dart';
+import 'package:SocialHub/pages/activity_feed.dart';
 import 'package:SocialHub/pages/comments.dart';
 import 'package:SocialHub/pages/home.dart';
 import 'package:SocialHub/widgets/custom_image.dart';
@@ -101,6 +102,7 @@ class _PostState extends State<Post> {
           return circularProgress();
         }
         User user = User.fromDocument(snapshot.data);
+        bool isPostOwner = currentUserId == ownerId;
         return ListTile(
           leading: CircleAvatar(
             backgroundImage: CachedNetworkImageProvider(user.photoUrl),
@@ -117,13 +119,71 @@ class _PostState extends State<Post> {
             ),
           ),
           subtitle: Text(location),
-          trailing: IconButton(
-            onPressed: () => print('deleting post'),
-            icon: Icon(Icons.more_vert),
-          ),
+          trailing: isPostOwner
+              ? IconButton(
+                  onPressed: () => handleDeletePost(context),
+                  icon: Icon(Icons.more_vert),
+                )
+              : Text(''),
         );
       },
     );
+  }
+
+  handleDeletePost(BuildContext parentContext) {
+    return showDialog(
+      context: parentContext,
+      builder: (context) {
+        return SimpleDialog(
+          title: Text("Remove this post?"),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context);
+                deletePost();
+              },
+              child: Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+            SimpleDialogOption(
+                onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+          ],
+        );
+      },
+    );
+  }
+
+  // Note: To delete post, ownerId and currentUserId must be equal, so they can be used interchangeably
+  deletePost() async {
+    // delete post itself
+    postsRef.doc(ownerId).collection('userPosts').doc(postId).get().then((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+    // delete uploaded image for thep ost
+    storageRef.child("post_$postId.jpg").delete();
+    // then delete all activity feed notifications
+    QuerySnapshot activityFeedSnapshot = await activityFeedRef
+        .doc(ownerId)
+        .collection("feedItems")
+        .where('postId', isEqualTo: postId)
+        .get();
+    activityFeedSnapshot.docs.forEach((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
+    // then delete all comments
+    QuerySnapshot commentsSnapshot =
+        await commentsRef.doc(postId).collection('comments').get();
+    commentsSnapshot.docs.forEach((doc) {
+      if (doc.exists) {
+        doc.reference.delete();
+      }
+    });
   }
 
   handleLikePost() {
@@ -204,7 +264,7 @@ class _PostState extends State<Post> {
           showHeart
               ? Animator(
                   duration: Duration(milliseconds: 300),
-                  tween: Tween(begin: 0.4, end: 1.0),
+                  tween: Tween(begin: 0.8, end: 1.4),
                   curve: Curves.elasticOut,
                   cycles: 0,
                   builder: (context, anim, child) => Transform.scale(
@@ -304,16 +364,11 @@ class _PostState extends State<Post> {
 
 showComments(BuildContext context,
     {String postId, String ownerId, String mediaUrl}) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) {
-        return Comments(
-          postId: postId,
-          postOwnerId: ownerId,
-          postMediaUrl: mediaUrl,
-        );
-      },
-    ),
-  );
+  Navigator.push(context, MaterialPageRoute(builder: (context) {
+    return Comments(
+      postId: postId,
+      postOwnerId: ownerId,
+      postMediaUrl: mediaUrl,
+    );
+  }));
 }
