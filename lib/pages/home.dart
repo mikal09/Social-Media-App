@@ -7,14 +7,17 @@ import 'package:SocialHub/pages/activity_feed.dart';
 import 'package:SocialHub/pages/create_account.dart';
 import 'package:SocialHub/pages/profile.dart';
 import 'package:SocialHub/pages/search.dart';
-import 'package:SocialHub/pages/timeline.dart';
 import 'package:SocialHub/pages/upload.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
-final storageRef = FirebaseStorage.instance.ref();
+final StorageReference storageRef = FirebaseStorage.instance.ref();
 final usersRef = FirebaseFirestore.instance.collection('users');
 final postsRef = FirebaseFirestore.instance.collection('posts');
+final commentsRef = FirebaseFirestore.instance.collection('comments');
+final activityFeedRef = FirebaseFirestore.instance.collection('feed');
+final followersRef = FirebaseFirestore.instance.collection('followers');
+final followingRef = FirebaseFirestore.instance.collection('following');
 final DateTime timestamp = DateTime.now();
 User currentUser;
 
@@ -126,7 +129,7 @@ class _HomeState extends State<Home> {
           ActivityFeed(),
           Upload(currentUser: currentUser),
           Search(),
-          Profile(),
+          Profile(profileId: currentUser?.id),
         ],
         controller: pageController,
         onPageChanged: onPageChanged,
